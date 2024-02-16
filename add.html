@@ -1,33 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        a {
+            display: inline-block;
+            margin: 10px;
+            font-size: 27px;
+        }
+    </style>
 </head>
+
 <body>
+    <a href="add.html">Add a duck</a>
+    <a href="search.html">Search</a>
+    <a href="pond.html">Pond</a>
+    <a href="index.html">Home</a>
+    <br />
     <label>Id:</label>
-    <input id="duckId"/>
+    <input id="duckId" />
     <label>Type:</label>
-    <input id="duckType" />
-    <label>Image</label>
-    <input type="file" id="duckImage" />
-    <button onclick="addTheDuck()">Add the duck</button>
+    <select id="duckType">
+        <option value="Mallard">Mallard</option>
+        <option value="Redhead">Redhead</option>
+        <option value="Rubber Duck">Rubber Duck</option>
+        <option value="Decoy Duck">Decoy Duck</option>
+        <label>Image</label>
+        <input type="file" id="duckImage" />
+        <button onclick="addTheDuck()">Add the duck</button>
 
 
-    <script>
-        function addTheDuck() {
-           let duckIdNode = document.getElementById("duckId");
-           let duckId = duckIdNode.value;
-           let duckTypeNode = document.getElementById("duckType");
-           let duckType = duckTypeNode.value;
-           let duck = {id: duckId, type: duckType}
-           alert("You entered: " + JSON.stringify(duck));
+        <script>
+            let host = "http://localhost:8080";
+            async function addTheDuck() {
+                let duckIdNode = document.getElementById("duckId");
+                let duckId = duckIdNode.value;
+                let duckTypeNode = document.getElementById("duckType");
+                let duckType = duckTypeNode.value;
+                let duck = { id: duckId, type: duckType }
+                //    alert("You entered: " + JSON.stringify(duck));
+                //    let duckImageNode = document.getElementById("duckImage");
+                //    alert("The image:" + duckImageNode.files[0].name + ", size = " + duckImageNode.files[0].size);
 
-           let duckImageNode = document.getElementById("duckImage");
-           alert("The image:" + duckImageNode.files[0].name + ", size = " + duckImageNode.files[0].size);          
-8        }
-    </script>
+                let request = {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(duck)
+                };
+                let response = await fetch(host + "/ducks", request);
+                let message = ''
+                if (response.status == 200) {
+                    let imageResponse = await addTheImage();
+                    if (imageResponse.status == 200) {
+                        message = "Duck and image added successfully";
+                    } else {
+                        console.log(imageResponse);
+                        message = "Duck added, but image failed to add";
+                    }
+                } else {
+                    console.log(response);
+                    message = "Duck failed to add";
+                }
+                alert(message);
+            }
+
+            async function addTheImage() {
+                let duckId = document.getElementById("duckId").value;
+                let duckImageNode = document.getElementById("duckImage");
+                let formData = new FormData();
+                formData.append("imageFile", duckImageNode.files[0]);
+                let request = {
+                    method: "POST",
+                    body: formData
+                };
+                let response = await fetch(host + "/ducks/" + duckId + "/image", request);
+                return response;
+            }
+        </script>
 
 </body>
+
 </html>

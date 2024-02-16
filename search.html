@@ -1,63 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search</title>
-</head>
-<body>
-    <label>Type:</label>
-    <input id="type" />
-    <button onclick="search()">Search</button>
-<table>
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Type</th>
-        </tr>
-    </thead>
-    <tbody id="searchResult">
-
-    </tbody>
-</table>
-
-<script>
-    let ducks = [
-        {id: 1, type: "Mallard"},
-        {id: 2, type: "Redhead"},
-        {id: 3, type: "Decoy"},
-        {id: 4, type: "Redhead"},
-        {id: 5, type: "Redhead"},
-        {id: 6, type: "Mallard"},
-    ];
-    function search() {
-        let typeNode = document.getElementById("type");
-        let type = typeNode.value.toUpperCase();
-        let searchResultNode = document.getElementById("searchResult");
-        searchResultNode.innerHTML = "";
-        for (let i = 0; i < ducks.length; i++) {
-            if (ducks[i].type.toUpperCase() === type) {
-                let row = document.createElement("tr");
-                let idCell = document.createElement("td");
-                idCell.innerHTML = ducks[i].id;
-                let typeCell = document.createElement("td");
-                typeCell.innerHTML = ducks[i].type;
-                row.appendChild(idCell);
-                row.appendChild(typeCell);
-                searchResultNode.appendChild(row);
-            } else if (type === "") {
-                let row = document.createElement("tr");
-                let idCell = document.createElement("td");
-                idCell.innerHTML = ducks[i].id;
-                let typeCell = document.createElement("td");
-                typeCell.innerHTML = ducks[i].type;
-                row.appendChild(idCell);
-                row.appendChild(typeCell);
-                searchResultNode.appendChild(row);
-            }
+    <style>
+        a {
+            display: inline-block;
+            margin: 10px;
+            font-size: 27px;
         }
-    }
-</script>
+    </style>
+</head>
+
+<body>
+    <a href="add.html">Add a duck</a>
+    <a href="search.html">Search</a>
+    <a href="pond.html">Pond</a>
+    <a href="index.html">Home</a>
+    <br />
+    <label>Type:</label>
+    <select id="type">
+        <option value="">All</option>
+        <option value="Mallard">Mallard</option>
+        <option value="Redhead">Redhead</option>
+        <option value="Rubber_Duck">Rubber Duck</option>
+        <option value="Decoy_Duck">Decoy Duck</option>
+    </select>
+    <button onclick="search()">Search</button>
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Type</th>
+            </tr>
+        </thead>
+        <tbody id="searchResult">
+
+        </tbody>
+    </table>
+
+    <script>
+        let ducks = [];
+        async function getAll() {
+            let response = await fetch("http://localhost:8080/ducks");
+            ducks = await response.json();
+        }
+        async function search() {
+            if (ducks.length == 0) {
+                await getAll();
+            }
+            let type = document.getElementById("type").value;
+            let searchResult = document.getElementById("searchResult");
+            searchResult.innerHTML = "";
+            for (let duck of ducks) {
+                if (!type || duck.type.toLowerCase() == type.toLowerCase()) {
+                    let row = document.createElement("tr");
+                    let idCell = document.createElement("td");
+                    idCell.innerText = duck.id;
+                    let typeCell = document.createElement("td");
+                    typeCell.innerText = duck.type.replace("_", " ");
+                    row.appendChild(idCell);
+                    row.appendChild(typeCell);
+                    searchResult.appendChild(row);
+                }
+            }
+
+        }
+    </script>
 </body>
+
 </html>
